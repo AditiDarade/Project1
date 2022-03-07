@@ -1,9 +1,10 @@
 /*-------------------------------------------------------
  *      File Name: Board.h
  *      Authors: Alice Kuang, Thresa Kelly, Minwoo Lee, Justin Sizoo, Maggie Swartz (Group #14)
+ *      Authors: Aditi Darade added special shots(Group #6)
  *      Assignment: EECS_448 Project #1
  *      Description: This is the header file for the Board class
- *      Date Last Modified: 02/13/2022
+ *      Date Last Modified: 03/05/2022
  *-----------------------------------------------------*/
 
 #ifndef BOARD_H
@@ -15,20 +16,42 @@ class Board {
 private:
     std::string player; //std::string representing player name
     int m_size; //member variable m_size, representing size of board
+	int specialShotAvailable; //NoOfSpecialShots variable is added to keep count of special shots
     char** initialGrid; //2D array of characters, representing initialGrid (the resulting grid after player places their own battleships)
     char** placeGrid; //2D array of characters, representing placeGrid (where a player places their own battleships)
     char** shotGrid; //2D array of characters, representing shotGrid (where a player tries to hit opponent's battleships and records results)
+	// Declare an array of doubles to be allocated on the heap
     int printCol[10] = { 1,2,3,4,5,6,7,8,9,10 }; //Array of integers, of size 10, filled w/ headers for column positions.
     char printRow[10] = { 'A','B','C','D','E','F','G','H','I','J' }; //Array of characters, of size 10, filled w/ headers for row positions.
+	//int printCol[10];
+	//char printRow[10];
 
 public:
+
+  /*----------
+    * @pre var specialShotAvailable must have some value
+    * @post returns a bool status of whether there the value of specialShotAvailable variable is greater then 0
+    * @param 
+    * @return boolean value T or F, whether special Shot Available or not
+    * -------*/
+	 bool isSpecialShotAvailable();
+
+	   /*----------
+    * @pre var specialShotAvailable must have some value
+    * @post returns the value of specialShotAvailable variable
+    * @param 
+    * @return the int value of specialShotAvailable variable
+    * -------*/
+	 int SpecialShotLeft();
+	
     /*----------
         * @pre int size must be 10x10, playerNum must be a string (will just be Player 1 or Player 2)
+		* NoOfSpecialShots variable is added to keep count of special shots
         * @post constructor for the Board class, an instance of board class is created
         * @param integer size - size of ship, and std::string playerNum - representing name of player
         * @return an instance of the Board class
         * -------*/
-    Board(int size, std::string playerNum);
+    Board(int size, std::string playerNum, int NoOfSpecialShots);
 
     /*----------
         * @pre an instance of Board class must exist to be deleted
@@ -56,11 +79,13 @@ public:
 
     /*----------
         * @pre both player's must have already placed their ships in their own placeGrid
+		* isSpecialShot parameter is added to note whether this shot is special shot or not
         * @post returns T/F value for whether a shot occurred and updates shotGrid
         * @param row/col represent x/y location where shot is taking place, Board* pointer references oppoent's board
         * @return boolean value T or F, representing whether or not a shot occurred at the given location
         * -------*/
-    bool shootShot(int row, int col, Board* opBoard);
+    bool shootShot(int row, int col, Board* opBoard, bool isSpecialShot);
+
 
     /*----------
         * @pre shootShot function returned true since a ship was hit
@@ -96,11 +121,12 @@ public:
 
     /*----------
         * @pre gameplay must have already begun
+		* isSpecialShot parameter is added to note whether this shot is special shot or not
         * @post returns T/F if shot loc invalid
         * @param row and col
         * @return boolean value T or F
         * -------*/
-    bool validShot(int row, int col);
+    bool validShot(int row, int col,bool isSpecialShot);
 };
 
 #endif

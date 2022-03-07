@@ -1,9 +1,10 @@
 /*-------------------------------------------------------
  * 	File Name: Executive.h
  * 	Authors: Alice Kuang, Thresa Kelly, Minwoo Lee, Justin Sizoo, Maggie Swartz (Group #14)
+ *  Authors: Aditi Darade added special shots(Group #6)
  * 	Assignment: EECS_448 Project #1
  * 	Description: This is the header file for the Executive class
- * 	Date Last Modified: 02/12/2022
+ * 	Date Last Modified: 03/05/2022
  *-----------------------------------------------------*/
 
 #ifndef EXECUTIVE_H
@@ -25,9 +26,12 @@ class Executive {
      		* @pre numShips >=1 && <= 5
      		* @post constructor creates an instance of the Executive class
      		* @param int numShips (1-5, chosen # of battleships for first player)
+			* @param int NoOfSpecialShotsis added to provide count of special shots equal to both players
      		* @return no true return, just creates instance of the class
      		* -------*/
-    		Executive(int numShips);
+    		
+
+			Executive(int numShips, int NoOfspecialShots);
 
 		/*----------
      		* @pre an instance of Executive class must exist to be deleted

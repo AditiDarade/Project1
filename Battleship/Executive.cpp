@@ -1,9 +1,10 @@
 /*-------------------------------------------------------
  *      File Name: Executive.cpp
  *      Authors: Alice Kuang, Thresa Kelly, Minwoo Lee, Justin Sizoo, Maggie Swartz (Group #14)
+ *      Authors: Aditi Darade added special shots(Group #6)
  *      Assignment: EECS_448 Project #1
  *      Description: This is the executable file for the Executive class
- *      Date Last Modified: 02/12/2022
+ *      Date Last Modified: 03/05/2022
  *-----------------------------------------------------*/
 
 #include "Executive.h"
@@ -11,11 +12,12 @@
 #include <iostream>
 #include <cctype>
 
-Executive::Executive(int numShips) { //Constructor for Executive class, takes in selected number of ships as a parameter.
+Executive::Executive(int numShips, int NoOfspecialShots)
+{ //Constructor for Executive class, takes in selected number of ships as a parameter.
 	m_size = 10; //Sets member variable m_size equal to 10 (creation of 10x10 playing board.
 	PTurn = false; //Variable PTurn keeps track of which player's turn it is, starts at false so Player 1 will go first when gameplay begins.
-	p1Board = new Board(m_size, "Player 1"); //Creates instance of Board class for Player 1, takes in m_size and name "Player 1" as parameters.
-	p2Board = new Board(m_size, "Player 2"); //Creates instance of Board class for Player 2, take in m_size and name "Player 2" as parameters.
+	p1Board = new Board(m_size, "Player 1",NoOfspecialShots); //Creates instance of Board class for Player 1, takes in m_size and name "Player 1" and NoOfspecialShots as parameters.
+	p2Board = new Board(m_size, "Player 2",NoOfspecialShots); //Creates instance of Board class for Player 2, take in m_size and name "Player 2" and NoOfspecialShots as parameters.
 	p1Board->printBoard("Initial"); //Prints out initial board prior to ship location selection.
 	chooseShipLoc(p1Board, numShips); //Player 1 places their ships on their board w/ selected number of ships.
 	p2Board->printBoard("Initial"); //Prints out initial board prior to ship location sleection.
@@ -29,14 +31,36 @@ Executive::~Executive() { //Destructor for the Executive class.
 
 void Executive::run() { //Void run function enables all gameplay functionality.
 	Board* board = p1Board; //Creates a pointer to Board instance p1Board (Player 1).
+	bool useSpecialShot=false;
 	Board* opBoard = p2Board; //Creates a pointer to Board instance opBoard (Player 2).
 	while (true) { //While loop to enable continuous gameplay until there is a winner.
+		useSpecialShot=false; //default value
         std::string shot = ""; //Initializes string shot to an empty string.
         int row = 0; //Initializes row location integer to 0.
         int col = 0; //Initializes column location integer to 0.
         char tmp; //temp to convert to lowercase
 		board->printBoard("Place");
 		board->printBoard("Shot"); //Print the updated shotGrid.
+		if(board->isSpecialShotAvailable())
+		{
+			char confirm;
+			std::cout << "Player " << PTurn+1 << ", do you want to use your special shot, available "<< board->SpecialShotLeft()<< " shot "; 
+			std::cout << "Press the Y key to confirm: ";
+			std::cin >> confirm;
+			//wheter use choose to use special shot or not
+			if(confirm == 'Y' || confirm == 'y')
+			{
+				useSpecialShot=true;
+			}
+			else
+			{
+				useSpecialShot=false;
+			}
+		}
+		//if user chooses to use special shot get the center cell location of special shot
+		if(useSpecialShot)
+			std::cout << "Player " << PTurn+1 << ", take your Special shot: "; 
+		else
         std::cout << "Player " << PTurn+1 << ", take your shot: "; //Message indicating Player 1 goes first, but alternates to next player in future by + on PTurn.
 		shot = validateLoc(shot); //Validate shot location.
 		
@@ -49,7 +73,7 @@ void Executive::run() { //Void run function enables all gameplay functionality.
 			tmp = tolower(shot[1]);
 			col = charToInt(tmp);
 		}
-		while (!board->validShot(row, col)) { //Ensure that shot isn't in same position
+		while (!board->validShot(row, col,useSpecialShot)) { //Ensure that shot isn't in same position
 			std::cout << "Error - you have already shot at this location, take your shot again: ";
 			shot = validateLoc(shot);
 			if (shot.length() == 3) { //If function helps to process shot location if in row 10 (legnth is 3 due to char + 10).
@@ -63,7 +87,7 @@ void Executive::run() { //Void run function enables all gameplay functionality.
 			}
 		}
 
-        if (board->shootShot(row, col, opBoard)) { //Check to see if there was a hit or miss at shot location.
+        if (board->shootShot(row, col, opBoard,useSpecialShot)) { //Check to see if there was a hit or miss at shot location.
 			if (opBoard->sinkStatus(row, col)) { //See if this shot resulted in the sinking of a ship...
 				std::cout << "SUNK!\n\n"; //If it did, output message indicating sunk status.
 			} else std::cout << "HIT!\n\n"; //If not sunk, but a hit did occur, then issue message indicating hit status.

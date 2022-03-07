@@ -1,14 +1,21 @@
 /*-------------------------------------------------------
  *      File Name: Board.cpp
  *      Authors: Alice Kuang, Thresa Kelly, Minwoo Lee, Justin Sizoo, Maggie Swartz (Group #14)
+ *      Authors: Aditi Darade added special shots(Group #6)
  *      Assignment: EECS_448 Project #1
  *      Description: This is the executable file for the Board class
- *      Date Last Modified: 02/13/2022
+ *      Date Last Modified: 03/05/2022
  *-----------------------------------------------------*/
 
 #include "Board.h"
+#include<string> 
 
-Board::Board(int size, std::string playerNum) { //Constructor for Board class, passes in parameters: size of board (always 10x10) and string representing player name/#.
+Board::Board(int size, std::string playerNum, int NoOfSpecialShots) 
+{ //Constructor for Board class, passes in parameters: size of board (always 10x10) and string representing player name/#.
+
+	specialShotAvailable=NoOfSpecialShots;
+	//for (int i = 0; i < 10; ++i){ printCol[i] = i + 1;}
+	//for (int i = 0; i < 10; ++i){printRow[i] = i + 'A';}
 	player = playerNum; //Sets member variable player = to playerNum argument (so either Player 1 or Player 2).
 	m_size = size; //Sets member variable m_size = to size argument passed in.
 	initialGrid = new char* [m_size]; //Creates array of characters to store the players initial placement of ship
@@ -90,19 +97,55 @@ bool Board::noCollisions(int size, int row, int col, char dir) {
 	return true; // there were no collisions
 }
 
-bool Board::validShot(int row, int col) { //validShot takes in row/col/pointer to oppenent's board, returns boolean indicating if this area has already been shot at
+bool Board::validShot(int row, int col,bool isSpecialShot) { //validShot takes in row/col/pointer to oppenent's board, returns boolean indicating if this area has already been shot at
+	if(!(specialShotAvailable>0 && isSpecialShot) )
+	{
 	if (shotGrid[row][col] != '0') return 0;
 	else return 1;
+	}
+	else
+	{
+		return 1;
+	}
 }
 
-bool Board::shootShot(int row, int col, Board* opBoard) { //shootShot takes in row/col/pointer to opponent's board, returns boolean indicating hit or miss.
-	if (opBoard->isHit(row, col)) { //If there was a hit on the opponent's board at the designed row and col location...
-		shotGrid[row][col] = 'H'; //Then insert an H in the own player's corresponding shot grid to represent a hit...
-		return true; //And return true because the player successfully hit an opponent's battleship.
+bool Board::shootShot(int row, int col, Board* opBoard,bool isSpecialShot) { //shootShot takes in row/col/pointer to opponent's board, returns boolean indicating hit or miss.
+	if(!isSpecialShot)
+	{
+		if (opBoard->isHit(row, col)) { //If there was a hit on the opponent's board at the designed row and col location...
+			shotGrid[row][col] = 'H'; //Then insert an H in the own player's corresponding shot grid to represent a hit...
+			return true; //And return true because the player successfully hit an opponent's battleship.
+		}
+		else {
+			shotGrid[row][col] = 'M'; //Else, insert a M in own player's corresponding shot grid to represent a miss...
+			return false; //And return false because no ship was hit.
+		}
 	}
-	else {
-		shotGrid[row][col] = 'M'; //Else, insert a M in own player's corresponding shot grid to represent a miss...
-		return false; //And return false because no ship was hit.
+	else
+	{
+		bool shipHit=false;
+		//Special Shot
+		//if user chooses to use special shot this nested for loop will shoot all 3X3 cell with row,col cell as center cell
+		for (int i = row-1; i <= row+1; i++) 
+		{
+			for (int j = col-1; j <= col+1; j++) 
+			{
+				if(i>=0 && i<m_size && j>=0 &&j<m_size)
+				{
+					if (opBoard->isHit(i, j)) { //If there was a hit on the opponent's board at the designed row and col location...
+						shotGrid[i][j] = 'H'; //Then insert an H in the own player's corresponding shot grid to represent a hit...
+						shipHit=true; //And return true because the player successfully hit an opponent's battleship.
+					}
+					else {
+						shotGrid[i][j] = 'M'; //Else, insert a M in own player's corresponding shot grid to represent a miss...
+						//return false; //And return false because no ship was hit.
+					}
+				}
+			}
+		}
+		//reduce count of special shots
+		specialShotAvailable=specialShotAvailable-1;
+		return shipHit;
 	}
 }
 
@@ -133,6 +176,19 @@ bool Board::sinkStatus(int row, int col) { //sinkStatus evaluates if a ship is s
 	return false; //The ship was not sunk, return false.
 }
 
+bool Board::isSpecialShotAvailable()
+{
+	bool res=false;
+	if(specialShotAvailable>0)
+	{
+		res=true;
+	}
+	return res;
+}
+int Board::SpecialShotLeft()
+{
+	return specialShotAvailable;
+}
 bool Board::checkWin() { //checkWin takes in no parameters and returns boolean value indicating whether a player has won battleship or not.
 	for (int i = 0; i < m_size; i++) { //Nested for loop traverses entirety of placeGrid board.
 		for (int j = 0; j < m_size; j++) {
